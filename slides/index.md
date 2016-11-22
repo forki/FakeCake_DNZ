@@ -46,6 +46,7 @@
 * Εγκατάσταση server, agents, ρυθμίσεις, βάσεις
 * Ποιός βάζει το chocolatey?
 * Πώς φτιάχνουμε το νέο version number?
+* Πως κάνω τοπικά build?
 
 ***
 #### Με build tools σε XML
