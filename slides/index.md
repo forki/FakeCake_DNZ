@@ -4,6 +4,7 @@
 - theme : night
 - transition : default
 
+
 ***
 ## Fake, Cake και Build tools
 
@@ -58,6 +59,14 @@
 * NAnt (XML)
 
 Μα δεν προγραμματίζω σε XML! Πάλι θα κυνηγάω addins?
+
+***
+### Στην παραλία 
+
+![beach](images/beach.png)
+
+Η λύση!
+
 
 ***
 #### Με buid tools στη γλώσσα μου
@@ -315,6 +324,14 @@
 * Τροποποιήσεις στο bootstrapper
 
 ***
+
+## Συμπεράσματα 
+
+* Αυτοματοποίηση τώρα!
+* Build script στη γλώσσα που προτιμάμε
+* Dependency management και τέρμα οι χεράτες εγκαταστάσεις
+* Και τα δύο δουλεύουν με TeamCity, AppVeyor, TFS κλπ
+
 
 ### FsReveal
 
