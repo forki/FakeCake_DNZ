@@ -5,7 +5,10 @@
 - transition : default
 
 ***
-# Fake, Cake και Build tools
+## Fake, Cake και Build tools
+
+![FakeCake](images/cake.jpg)
+
 ### Παναγιώτης Καναβός
 
 ***
@@ -73,12 +76,21 @@
 </table>
 
 ***
+
 #### Τί είναι?
 
 - "DSL" για build tasks σε F# ή C#
 - Βασισμένα σε F# ή C# scripting
 - Δεκάδες έτοιμα tasks (Git, Unit Testing, Azure etc)
 - Λείπει κάτι? Το γράφεις επί τόπου 
+
+***
+
+### Fake
+
+![FakeLogo](images/fake.png)
+
+Διαθέσιμο στο  [http://fsharp.github.io/FAKE/](http://fsharp.github.io/FAKE/)
 
 ***
 
@@ -116,6 +128,16 @@
     // start build
     RunTargetOrDefault "Default"
 
+
+***
+
+### Targets 
+
+ * Τα βασικά βήματα
+ * Καλούνται με όνομα
+ * Συνδέονται μέσω dependencies
+
+
 ***
 
 ### Cleaning up
@@ -130,6 +152,27 @@
     // Dependencies
     "Clean"
       ==> "Default"
+
+*** 
+
+### Dependencies 
+
+* Τί πρέπει να τρέξει πρώτο, τί δεύτερο
+
+<pre>
+"Clean" 
+  ==> "BuildApp" 
+  ==> "Default"
+</pre>
+
+ * Conditional dependencies 
+
+<pre>
+"Clean" 
+    ==> "BuildApp"
+    =?> ("Test",hasBuildParam "xUnitTest")   
+    ==> "Default"
+</pre>
 
 ***
 
@@ -149,18 +192,19 @@
 
 ***
 
-### Compiling the application
+### File Sets
 
-    Target "BuildApp" (fun _ ->
-        !! "src/app/**/*.csproj"
-          |> MSBuildRelease buildDir "Build"
-          |> Log "AppBuild-Output: "
-    )
+- Include files
 
-    // Dependencies
-    "Clean"
-      ==> "BuildApp"
-      ==> "Default"
+    `!! "src/app/**/*.csproj"`
+
+- Πρόσθετα αρχεία 
+
+    `++ "test/**/*.csproj"`
+
+* Εξαιρέσεις
+
+    `-- "test/**/*.Integration.csproj"`
 
 ***
 
@@ -188,11 +232,38 @@
 
 *** 
 
+### Λείπει? Το φτιάχνεις
+
+    //Returns 16.48.3.1511
+    let myVersion =
+        let dfi=DateTimeFormatInfo.CurrentInfo
+        let calendar=dfi.Calendar
+
+        let now=DateTime.Now
+        let weekNum=calendar.GetWeekOfYear(now,dfi.CalendarWeekRule,dfi.FirstDayOfWeek)
+        String.Format("{0:yy}.{1}.{2}.{0:HHmm}",now,weekNum,(int)now.DayOfWeek  )
+
+***
+
+### Builds from the Gurus
+
+* PAKET - Τάξις!
+    *  parseAllReleaseNotes !
+* FAKE 
+* FsReveal
+    * Όλα σ' ένα!
+
+*** 
+
 ### Και το PAKET ?
+
+![PaketLogo](images/paket.png)
 
 - Dependency Manager για .NET, Mono
 - Δουλεύει με NuGet
 - Συνεργάζεται με http, github repos 
+
+Διαθέσιμο στο [https://fsprojects.github.io/Paket/](https://fsprojects.github.io/Paket/)
 
 *** 
 
@@ -202,12 +273,54 @@
 ' Έτυχε ποτέ ένα πακέτο να σας χαλάσει άλλο γιατί φόρτωσε άλλη έκδοση κάποιου τρίτου?
 - Παρόμοιο θα ήταν και το project.json 
 
-***
-### What is FsReveal?
+*** 
 
-- Generates [reveal.js](http://lab.hakim.se/reveal-js/#/) presentation from [markdown](http://daringfireball.net/projects/markdown/)
-- Utilizes [FSharp.Formatting](https://github.com/tpetricek/FSharp.Formatting) for markdown parsing
-- Get it from [http://fsprojects.github.io/FsReveal/](http://fsprojects.github.io/FsReveal/)
+### Cake!
+
+![CakeLogo](images/cake.png)
+
+* Build tool σε C#
+* Πιο πρόσφατο
+* Πιο γνώριμο αλλά και πιο φλύαρο
+
+Διαθέσιμο στο [http://cakebuild.net/](http://cakebuild.net/)
+
+***
+
+### Διαφορές σε ορολογία
+
+* Targets --> tasks
+* Dependencies στα tasks
+* File patterns αντί για filesets
+* **Και .NET Core!**
+
+***
+
+### Παράδειγμα  
+
+    [lang="cs"]
+    Task("Run-Unit-Tests")
+        .IsDependentOn("Build")
+        .Does(() =>
+    {
+        NUnit("./src/**/bin/" + configuration + "/*.Tests.dll");
+    });
+
+
+***
+
+### Packet/Tool Management
+
+* Μέσω nuget
+* Τροποποιήσεις στο bootstrapper
+
+***
+
+### FsReveal
+
+- Δημιουργεί παρουσιάσεις με [reveal.js](http://lab.hakim.se/reveal-js/#/) από [markdown](http://daringfireball.net/projects/markdown/)
+- Όλη η παρουσίαση ήταν ένα Markdown!
+- Διαθέσιμο στο [http://fsprojects.github.io/FsReveal/](http://fsprojects.github.io/FsReveal/)
 
 ![FsReveal](images/logo.png)
 
@@ -215,7 +328,7 @@
 
 ### Reveal.js
 
-- A framework for easily creating beautiful presentations using HTML.
+- Framework για τη δημιουργία παρουσιάσεων σε JavaScript
 
 
 > **Atwood's Law**: any application that can be written in JavaScript, will eventually be written in JavaScript.

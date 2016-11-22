@@ -1,39 +1,222 @@
 ﻿(**
-- title : FsReveal 
-- description : Introduction to FsReveal
-- author : Karlkim Suwanmongkol
-- theme : Sky
+- title : FakeCake
+- description : Fake, Cake and Build tools
+- author : Παναγιώτης Καναβός
+- theme : night
 - transition : default
 
 ***
-
-### What is FsReveal?
-
-- Generates [reveal.js](http://lab.hakim.se/reveal-js/#/) presentation from [markdown](http://daringfireball.net/projects/markdown/)
-- Utilizes [FSharp.Formatting](https://github.com/tpetricek/FSharp.Formatting) for markdown parsing
+# Fake, Cake και Build tools
+### Παναγιώτης Καναβός
 
 ***
 
-### Reveal.js
+### Μία απλή υπόθεση
 
-- A framework for easily creating beautiful presentations using HTML.  
-  
-> **Atwood's Law**: any application that can be written in JavaScript, will eventually be written in JavaScript.
+- Ένα console εργαλείο
+- Μερικά tests
+- Ένας Server
+- Ένα deployment
+
+***
+### Με μερικές λεπτομέρειες
+
+- Chocolatey για εύκολο upgrade
+- Νέο version για κάθε deployment
+* Δημιουργία package
+* Αντιγραφή και upgrade
+
+*** 
+### Και λίγες ακόμα
+
+- Αναβάθμιση NuGet packages
+- Κατέβασμα εργαλείων όπως Chocolatey 
+
+*** 
+### Πως το κάνουμε?
+
+* Με το χέρι
+' Παίρνει πολύ ώρα, βαρετό, πολύ εύκολο λάθος
+* Με build events!
+' Edit σε 3 γραμμές? DOS scripting?
+
+***
+#### Με ένα build server
+
+* Τeam City, TFS
+* Εγκατάσταση server, agents, ρυθμίσεις, βάσεις
+* Ποιός βάζει το chocolatey?
+* Πώς φτιάχνουμε το νέο version number?
+* Πως κάνω τοπικά build?
+
+***
+#### Με build tools σε XML
+
+* MSBuild (XML)
+* NAnt (XML)
+
+Μα δεν προγραμματίζω σε XML! Πάλι θα κυνηγάω addins?
+
+***
+#### Με buid tools στη γλώσσα μου
+* PSake (Powershell)
+* FAKE (F#)
+* Cake (C#)
+
+***
+#### Γιατί Fake και Cake ?
+
+<table>
+<th></th><th>Downloads</th><th>Commits</th><th>Contributors</th>
+<tr><td>PSake </td><td> 132K </td><td>407 </td><td>48 </td>
+<tr><td>FAKE  </td><td> 635K </td><td>6000 </td><td>244 </td>
+<tr><td>Cake  </td><td> 210K </td><td>1654</td><td>94</td>
+</table>
+
+***
+#### Τί είναι?
+
+- "DSL" για build tasks σε F# ή C#
+- Βασισμένα σε F# ή C# scripting
+- Δεκάδες έτοιμα tasks (Git, Unit Testing, Azure etc)
+- Λείπει κάτι? Το γράφεις επί τόπου 
 
 ***
 
-### FSharp.Formatting
+### Τρέχοντας το FAKE
 
-- F# tools for generating documentation (Markdown processor and F# code formatter).
-- It parses markdown and F# script file and generates HTML or PDF.
-- Code syntax highlighting support.
-- It also evaluates your F# code and produce tooltips.
+Με αυτόματη εγκατάσταση μέσω NuGet
+
+    @echo off
+    cls
+    .nuget/NuGet.exe Install FAKE -ExcludeVersion
+    packages/FAKE/tools/Fake.exe build.fsx
+    pause
+
+ή με PAKET
+
+    @echo off
+    cls
+    .paket/paket.exe restore
+    packages/FAKE/tools/Fake.exe build.fsx
+    pause
 
 ***
 
-### Syntax Highlighting
+### Hello world
+*)
+    // include Fake lib
+    #r @"packages/FAKE/tools/FakeLib.dll"
+    open Fake
 
-#### F# (with tooltips)
+    // Default target
+    Target "Default" (fun _ ->
+        trace "Hello World from FAKE"
+    )
+
+    // start build
+    RunTargetOrDefault "Default"
+
+(**
+
+***
+
+### Cleaning up
+
+*)
+    let buildDir = "./build/"
+
+    // Targets
+    Target "Clean" (fun _ ->
+        CleanDir buildDir
+    )
+
+    // Dependencies
+    "Clean"
+      ==> "Default"
+(**
+
+***
+
+### Compiling the application
+
+*)
+
+    Target "BuildApp" (fun _ ->
+        !! "src/app/**/*.csproj"
+        ++ "src/app**/*.fsproj"
+          |> MSBuildRelease buildDir "Build"
+          |> Log "AppBuild-Output: "
+    )
+
+    // Dependencies
+    "Clean"
+      ==> "BuildApp"
+      ==> "Default"
+
+(**
+
+***
+
+### Compiling the application
+
+*)
+
+    Target "BuildApp" (fun _ ->
+        !! "src/app/**/*.csproj"
+          |> MSBuildRelease buildDir "Build"
+          |> Log "AppBuild-Output: "
+    )
+
+    // Dependencies
+    "Clean"
+      ==> "BuildApp"
+      ==> "Default"
+
+*)
+
+***
+
+### Running tests
+
+(**
+    Target "Test" (fun _ ->
+        !! (testDir </> "NUnit.Test.*.dll")
+          |> NUnit (fun p ->
+              {p with
+                 // override default parameters
+                 DisableShadowCopy = true;
+                 OutputFile = testDir </> "TestResults.xml" })
+    )
+
+
+    "Clean"
+      ==> "BuildApp"
+      ==> "BuildTest"  
+      ==> "Test"
+      ==> "Default"
+
+*)
+
+***
+
+### Ένα πλήρες παράδειγμα
+
+*** 
+
+### Και το PAKET ?
+
+- Dependency Manager για .NET, Mono
+- Δουλεύει με NuGet
+- Συνεργάζεται με http, github repos 
+
+*** 
+
+### Γιατί PAKET ?
+- Επιτρέπει έλεγχο *όλων* των dependencies
+- Διαχειρίζεται *transitive* dependencies?
+' Έτυχε ποτέ ένα πακέτο να σας χαλάσει άλλο γιατί φόρτωσε άλλη έκδοση κάποιου τρίτου?
+- Παρόμοιο θα ήταν και το project.json 
 
 *)
 let a = 5
