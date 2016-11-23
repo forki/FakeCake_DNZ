@@ -115,6 +115,7 @@
 
 ή με PAKET
 
+    [lang=paket]
     @echo off
     cls
     .paket/paket.exe restore
@@ -221,11 +222,8 @@
 
     Target "Test" (fun _ ->
         !! (testDir </> "NUnit.Test.*.dll")
-          |> NUnit (fun p ->
-              {p with
-                 // override default parameters
-                 DisableShadowCopy = true;
-                 OutputFile = testDir </> "TestResults.xml" })
+          |> NUnit3 (fun p ->
+              {p with WorkingDir = testDir })
     )
 
 
@@ -245,12 +243,34 @@
 
     //Returns 16.48.3.1511
     let myVersion =
-        let dfi=DateTimeFormatInfo.CurrentInfo
-        let calendar=dfi.Calendar
-
-        let now=DateTime.Now
-        let weekNum=calendar.GetWeekOfYear(now,dfi.CalendarWeekRule,dfi.FirstDayOfWeek)
+        let getWeekNum date =
+            let dfi=DateTimeFormatInfo.CurrentInfo
+            let calendar=dfi.Calendar
+            calendar.GetWeekOfYear(date,dfi.CalendarWeekRule,dfi.FirstDayOfWeek)
+        
+        let now = DateTime.Now
+        let weekNum=getWeekNum 
         String.Format("{0:yy}.{1}.{2}.{0:HHmm}",now,weekNum,(int)now.DayOfWeek  )
+
+***
+
+### Κι αν δεν έχει Remote Powershell ...
+
+    let InvokeRemote server command =
+        let block = ScriptBlock.Create(command)
+        let pipe=PowerShell.Create()    
+                        .AddCommand("invoke-command")
+                        .AddParameter("ComputerName", server)            
+                        .AddParameter("ScriptBlock", block)
+        pipe.Invoke() 
+        |> Seq.map (sprintf  "%O")
+        |> Seq.iter (fun line ->
+                        let tracer=if line.Contains("not installed") then
+                                        traceError 
+                                    else 
+                                        trace
+                        tracer line)
+        pipe.Streams.Error |> Seq.iter (traceError << sprintf "%O" )
 
 ***
 
