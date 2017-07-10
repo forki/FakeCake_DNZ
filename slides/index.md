@@ -8,7 +8,7 @@
 ***
 ## Fake, Cake και Build tools
 
-![FakeCake](images/cake.jpg)
+![FakeCake](images/cake.JPG)
 
 ### Παναγιώτης Καναβός
 
